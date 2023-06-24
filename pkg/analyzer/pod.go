@@ -39,9 +39,25 @@ func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 	}
 	var preAnalysis = map[string]common.PreAnalysis{}
 
+	nodeSelectorMissing := 0
 	for _, pod := range list.Items {
+		if SkipNamespace(pod.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 		// Check for pending pods
+
+		if pod.Spec.NodeSelector == nil && pod.Namespace != "kube-system" && pod.Namespace != "rdei-system" && nodeSelectorMissing == 0 {
+			nodeSelectorMissing++
+			failures = append(failures, common.Failure{
+				Text: `Pods need a nodeSelector. Add rdei.io/sec-zone-green: "true" to access the green zone`,
+				Sensitive: []common.Sensitive{
+					{
+						Unmasked: pod.Name, Masked: util.MaskString(pod.Name),
+					},
+				},
+			})
+		}
 		if pod.Status.Phase == "Pending" {
 
 			// Check through container status to check for crashes

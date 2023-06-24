@@ -23,7 +23,7 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt/pkg/cache"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/util"
 
-	"github.com/sashabaranov/go-openai"
+	openai "github.com/sashabaranov/go-openai"
 
 	"github.com/fatih/color"
 )

@@ -40,6 +40,9 @@ func (PvcAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 	var preAnalysis = map[string]common.PreAnalysis{}
 
 	for _, pvc := range list.Items {
+		if SkipNamespace(pvc.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 
 		// Check for empty rs

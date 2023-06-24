@@ -51,6 +51,9 @@ func (ServiceAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 	var preAnalysis = map[string]common.PreAnalysis{}
 
 	for _, ep := range list.Items {
+		if SkipNamespace(ep.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 
 		// Check for empty service

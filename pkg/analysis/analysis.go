@@ -30,7 +30,6 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt/pkg/common"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/kubernetes"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/util"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/viper"
 )
 
@@ -108,6 +107,7 @@ func NewAnalysis(backend string, language string, filters []string, namespace st
 
 	kubecontext := viper.GetString("kubecontext")
 	kubeconfig := viper.GetString("kubeconfig")
+
 	client, err := kubernetes.NewClient(kubecontext, kubeconfig)
 	if err != nil {
 		color.Red("Error initialising kubernetes client: %v", err)
@@ -245,11 +245,6 @@ func (a *Analysis) GetAIResults(output string, anonymize bool) error {
 		return nil
 	}
 
-	var bar *progressbar.ProgressBar
-	if output != "json" {
-		bar = progressbar.Default(int64(len(a.Results)))
-	}
-
 	for index, analysis := range a.Results {
 		var texts []string
 
@@ -272,9 +267,6 @@ func (a *Analysis) GetAIResults(output string, anonymize bool) error {
 		if err != nil {
 			// FIXME: can we avoid checking if output is json multiple times?
 			//   maybe implement the progress bar better?
-			if output != "json" {
-				_ = bar.Exit()
-			}
 
 			// Check for exhaustion
 			if strings.Contains(err.Error(), "status code: 429") {
@@ -293,9 +285,7 @@ func (a *Analysis) GetAIResults(output string, anonymize bool) error {
 		}
 
 		analysis.Details = parsedText
-		if output != "json" {
-			_ = bar.Add(1)
-		}
+
 		a.Results[index] = analysis
 	}
 	return nil

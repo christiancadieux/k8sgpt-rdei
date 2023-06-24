@@ -51,6 +51,9 @@ func (NetworkPolicyAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error)
 	var preAnalysis = map[string]common.PreAnalysis{}
 
 	for _, policy := range policies.Items {
+		if SkipNamespace(policy.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 
 		// Check if policy allows traffic to all pods in the namespace

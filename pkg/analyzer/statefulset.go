@@ -48,6 +48,9 @@ func (StatefulSetAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 	var preAnalysis = map[string]common.PreAnalysis{}
 
 	for _, sts := range list.Items {
+		if SkipNamespace(sts.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 
 		// get serviceName

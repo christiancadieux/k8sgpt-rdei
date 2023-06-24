@@ -20,6 +20,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubectl/pkg/scheme"
+	"os"
 )
 
 func (c *Client) GetConfig() *rest.Config {
@@ -37,7 +38,7 @@ func (c *Client) GetRestClient() rest.Interface {
 func NewClient(kubecontext string, kubeconfig string) (*Client, error) {
 	var config *rest.Config
 	config, err := rest.InClusterConfig()
-	if err != nil {
+	if err != nil || os.Getenv("REMOTE") == "Y" {
 		loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 
 		if kubeconfig != "" {

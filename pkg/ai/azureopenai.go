@@ -3,7 +3,6 @@ package ai
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -22,7 +21,7 @@ type AzureAIClient struct {
 }
 
 func (c *AzureAIClient) Configure(config IAIConfig, lang string) error {
-	token := config.GetPassword()
+	/*token := config.GetPassword()
 	baseURL := config.GetBaseURL()
 	engine := config.GetEngine()
 	defaultConfig := openai.DefaultAzureConfig(token, baseURL, engine)
@@ -33,6 +32,8 @@ func (c *AzureAIClient) Configure(config IAIConfig, lang string) error {
 	c.language = lang
 	c.client = client
 	c.model = config.GetModel()
+	*/
+
 	return nil
 }
 

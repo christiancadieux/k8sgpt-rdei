@@ -49,6 +49,9 @@ func (IngressAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 	var preAnalysis = map[string]common.PreAnalysis{}
 
 	for _, ing := range list.Items {
+		if SkipNamespace(ing.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 
 		// get ingressClassName

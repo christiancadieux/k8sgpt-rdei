@@ -49,6 +49,9 @@ func (PdbAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 	var preAnalysis = map[string]common.PreAnalysis{}
 
 	for _, pdb := range list.Items {
+		if SkipNamespace(pdb.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 		if pdb.Status.Conditions[0].Type == "DisruptionAllowed" && pdb.Status.Conditions[0].Status == "False" {
 			var doc string

@@ -29,6 +29,13 @@ import (
 type DeploymentAnalyzer struct {
 }
 
+func SkipNamespace(s string) bool {
+	if s == "kube-system" || s == "default" || s == "rdei-system" {
+		return true
+	}
+	return false
+}
+
 // Analyze scans all namespaces for Deployments with misconfigurations
 func (d DeploymentAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
@@ -53,6 +60,9 @@ func (d DeploymentAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) 
 	var preAnalysis = map[string]common.PreAnalysis{}
 
 	for _, deployment := range deployments.Items {
+		if SkipNamespace(deployment.Namespace) {
+			continue
+		}
 		var failures []common.Failure
 		if *deployment.Spec.Replicas != deployment.Status.Replicas {
 			doc := apiDoc.GetApiDocV2("spec.replicas")

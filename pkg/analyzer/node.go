@@ -27,6 +27,8 @@ type NodeAnalyzer struct{}
 
 func (NodeAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
+	return nil, nil
+
 	kind := "Node"
 
 	AnalyzerErrorsMetric.DeletePartialMatch(map[string]string{

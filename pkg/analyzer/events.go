@@ -23,6 +23,7 @@ import (
 
 func FetchLatestEvent(ctx context.Context, kubernetesClient *kubernetes.Client, namespace string, name string) (*v1.Event, error) {
 
+	return nil, nil
 	// get the list of events
 	events, err := kubernetesClient.GetClient().CoreV1().Events(namespace).List(ctx,
 		metav1.ListOptions{
