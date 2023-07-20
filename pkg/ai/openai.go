@@ -15,9 +15,13 @@ package ai
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
+	"os"
 	"strings"
 
 	"github.com/k8sgpt-ai/k8sgpt/pkg/cache"
@@ -35,15 +39,32 @@ type OpenAIClient struct {
 }
 
 func (c *OpenAIClient) Configure(config IAIConfig, language string) error {
+
 	token := config.GetPassword()
-	defaultConfig := openai.DefaultConfig(token)
+	currentConfig := openai.DefaultConfig(token)
+
+	proxy := os.Getenv("PROXY_URL")
+	if proxy != "" {
+		currentConfig = openai.DefaultConfig(token)
+		proxyUrl, err := url.Parse(proxy)
+		if err != nil {
+			panic(err)
+		}
+		transport := &http.Transport{
+			Proxy:           http.ProxyURL(proxyUrl),
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		currentConfig.HTTPClient = &http.Client{
+			Transport: transport,
+		}
+	}
 
 	baseURL := config.GetBaseURL()
 	if baseURL != "" {
-		defaultConfig.BaseURL = baseURL
+		currentConfig.BaseURL = baseURL
 	}
 
-	client := openai.NewClientWithConfig(defaultConfig)
+	client := openai.NewClientWithConfig(currentConfig)
 	if client == nil {
 		return errors.New("error creating OpenAI client")
 	}

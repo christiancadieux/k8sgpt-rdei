@@ -42,7 +42,7 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "k8sgpt",
-	Short: "Kubernetes debugging powered by AI",
+	Short: "Kubernetes debugging powered by AI (with proxy support)",
 	Long:  ``,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
