@@ -46,7 +46,7 @@ var AnalyzeCmd = &cobra.Command{
 
 		// AnalysisResult configuration
 		config, err := analysis.NewAnalysis(backend,
-			language, filters, namespace, nocache, explain, maxConcurrency, withDoc)
+			language, filters, namespace, nocache, explain, maxConcurrency, withDoc, "")
 		if err != nil {
 			color.Red("Error: %v", err)
 			os.Exit(1)

@@ -79,6 +79,7 @@ func (c *OpenAIClient) GetCompletion(ctx context.Context, prompt string, promptT
 	if len(promptTmpl) == 0 {
 		promptTmpl = PromptMap["default"]
 	}
+	// fmt.Println("GetCompletion0", fmt.Sprintf(promptTmpl, c.language, prompt))
 	resp, err := c.client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model: c.model,
 		Messages: []openai.ChatCompletionMessage{

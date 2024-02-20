@@ -72,6 +72,7 @@ func init() {
 	rootCmd.AddCommand(generate.GenerateCmd)
 	rootCmd.AddCommand(integration.IntegrationCmd)
 	rootCmd.AddCommand(serve.ServeCmd)
+	rootCmd.AddCommand(serve.HttpCmd)
 	rootCmd.AddCommand(cache.CacheCmd)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.k8sgpt.yaml)")
 	rootCmd.PersistentFlags().StringVar(&kubecontext, "kubecontext", "", "Kubernetes context to use. Only required if out-of-cluster.")

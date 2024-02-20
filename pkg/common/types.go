@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	gtwapi "sigs.k8s.io/gateway-api/apis/v1"
 
 	trivy "github.com/aquasecurity/trivy-operator/pkg/apis/aquasecurity/v1alpha1"
 	openapi_v2 "github.com/google/gnostic/openapiv2"
@@ -54,6 +55,9 @@ type PreAnalysis struct {
 	StatefulSet              appsv1.StatefulSet
 	NetworkPolicy            networkv1.NetworkPolicy
 	Node                     v1.Node
+	GatewayClass             gtwapi.GatewayClass
+	Gateway                  gtwapi.Gateway
+	HTTPRoute                gtwapi.HTTPRoute
 	// Integrations
 	TrivyVulnerabilityReport trivy.VulnerabilityReport
 }
@@ -63,6 +67,7 @@ type Result struct {
 	Name         string    `json:"name"`
 	Error        []Failure `json:"error"`
 	Details      string    `json:"details"`
+	Ref          string    `json:"ref"`
 	ParentObject string    `json:"parentObject"`
 }
 

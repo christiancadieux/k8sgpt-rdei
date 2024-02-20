@@ -68,7 +68,7 @@ func (ServiceAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 				doc := apiDoc.GetApiDocV2("spec.selector")
 
 				failures = append(failures, common.Failure{
-					Text:          fmt.Sprintf("Service has no endpoints, expected label %s=%s", k, v),
+					Text:          fmt.Sprintf("Service %s has no endpoints, expected label %s=%s", ep.Name, k, v),
 					KubernetesDoc: doc,
 					Sensitive: []common.Sensitive{
 						{

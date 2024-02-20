@@ -50,7 +50,7 @@ func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		if pod.Spec.NodeSelector == nil && pod.Namespace != "kube-system" && pod.Namespace != "rdei-system" && nodeSelectorMissing == 0 {
 			nodeSelectorMissing++
 			failures = append(failures, common.Failure{
-				Text: `Pods need a nodeSelector. Add rdei.io/sec-zone-green: "true" to access the green zone. Same for blue or origin.`,
+				Text: `Pods need a spec.nodeSelector. Add rdei.io/sec-zone-green: "true" to the pod or deployment to access the green zone. Same for blue or origin.`,
 				Sensitive: []common.Sensitive{
 					{
 						Unmasked: pod.Name, Masked: util.MaskString(pod.Name),

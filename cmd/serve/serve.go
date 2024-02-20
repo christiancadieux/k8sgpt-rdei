@@ -32,7 +32,7 @@ var (
 
 var ServeCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Runs k8sgpt as a server",
+	Short: "Runs k8sgpt as a gRPC server",
 	Long:  `Runs k8sgpt as a server to allow for easy integration with other applications.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -106,12 +106,6 @@ var ServeCmd = &cobra.Command{
 			Token:       aiProvider.Password,
 			Logger:      logger,
 		}
-		go func() {
-			if err := server.ServeMetrics(); err != nil {
-				color.Red("Error: %v", err)
-				os.Exit(1)
-			}
-		}()
 
 		go func() {
 			if err := server.Serve(); err != nil {
@@ -127,7 +121,7 @@ var ServeCmd = &cobra.Command{
 
 func init() {
 	// add flag for backend
-	ServeCmd.Flags().StringVarP(&port, "port", "p", "8080", "Port to run the server on")
+	// ServeCmd.Flags().StringVarP(&port, "port", "p", "8080", "Port to run the server on")
 	ServeCmd.Flags().StringVarP(&metricsPort, "metrics-port", "", "8081", "Port to run the metrics-server on")
 	ServeCmd.Flags().StringVarP(&backend, "backend", "b", "openai", "Backend AI provider")
 }

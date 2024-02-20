@@ -53,22 +53,22 @@ func (analyzer CronJobAnalyzer) Analyze(a common.Analyzer) ([]common.Result, err
 	for _, cronJob := range cronJobList.Items {
 		var failures []common.Failure
 		if cronJob.Spec.Suspend != nil && *cronJob.Spec.Suspend {
-			doc := apiDoc.GetApiDocV2("spec.suspend")
-
-			failures = append(failures, common.Failure{
-				Text:          fmt.Sprintf("CronJob %s is suspended", cronJob.Name),
-				KubernetesDoc: doc,
-				Sensitive: []common.Sensitive{
-					{
-						Unmasked: cronJob.Namespace,
-						Masked:   util.MaskString(cronJob.Namespace),
+			// doc := apiDoc.GetApiDocV2("spec.suspend")
+			/*
+				failures = append(failures, common.Failure{
+					Text:          fmt.Sprintf("CronJob %s is suspended", cronJob.Name),
+					KubernetesDoc: doc,
+					Sensitive: []common.Sensitive{
+						{
+							Unmasked: cronJob.Namespace,
+							Masked:   util.MaskString(cronJob.Namespace),
+						},
+						{
+							Unmasked: cronJob.Name,
+							Masked:   util.MaskString(cronJob.Name),
+						},
 					},
-					{
-						Unmasked: cronJob.Name,
-						Masked:   util.MaskString(cronJob.Name),
-					},
-				},
-			})
+				}) */
 		} else {
 			// check the schedule format
 			if _, err := CheckCronScheduleIsValid(cronJob.Spec.Schedule); err != nil {

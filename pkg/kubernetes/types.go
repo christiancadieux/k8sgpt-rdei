@@ -6,6 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Client struct {
@@ -13,6 +14,7 @@ type Client struct {
 	RestClient    rest.Interface
 	Config        *rest.Config
 	ServerVersion *version.Info
+	CtrlClient    ctrl.Client
 }
 
 type K8sApiReference struct {

@@ -21,6 +21,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubectl/pkg/scheme"
 	"os"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (c *Client) GetConfig() *rest.Config {
@@ -33,6 +34,10 @@ func (c *Client) GetClient() kubernetes.Interface {
 
 func (c *Client) GetRestClient() rest.Interface {
 	return c.RestClient
+}
+
+func (c *Client) GetCtrlClient() ctrl.Client {
+	return c.CtrlClient
 }
 
 func NewClient(kubecontext string, kubeconfig string) (*Client, error) {

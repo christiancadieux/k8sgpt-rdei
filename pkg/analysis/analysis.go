@@ -64,7 +64,8 @@ type JsonOutput struct {
 	Results  []common.Result `json:"results"`
 }
 
-func NewAnalysis(backend string, language string, filters []string, namespace string, noCache bool, explain bool, maxConcurrency int, withDoc bool) (*Analysis, error) {
+func NewAnalysis(backend string, language string, filters []string, namespace string, noCache bool, explain bool, maxConcurrency int, withDoc bool,
+	kubecontext0 string) (*Analysis, error) {
 	var configAI ai.AIConfiguration
 	err := viper.UnmarshalKey("ai", &configAI)
 	if err != nil {
@@ -106,6 +107,9 @@ func NewAnalysis(backend string, language string, filters []string, namespace st
 	// Get kubernetes client from viper
 
 	kubecontext := viper.GetString("kubecontext")
+	if kubecontext0 != "" {
+		kubecontext = kubecontext0
+	}
 	kubeconfig := viper.GetString("kubeconfig")
 
 	client, err := kubernetes.NewClient(kubecontext, kubeconfig)
@@ -240,11 +244,14 @@ func (a *Analysis) RunAnalysis() {
 	wg.Wait()
 }
 
+const (
+	RESOLVE_DIR = "./Resolution"
+)
+
 func (a *Analysis) GetAIResults(output string, anonymize bool) error {
 	if len(a.Results) == 0 {
 		return nil
 	}
-
 	for index, analysis := range a.Results {
 		var texts []string
 
