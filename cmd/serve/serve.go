@@ -14,14 +14,7 @@ limitations under the License.
 package serve
 
 import (
-	"os"
-
-	"github.com/fatih/color"
-	"github.com/k8sgpt-ai/k8sgpt/pkg/ai"
-	k8sgptserver "github.com/k8sgpt-ai/k8sgpt/pkg/server"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 var (
@@ -36,86 +29,6 @@ var ServeCmd = &cobra.Command{
 	Long:  `Runs k8sgpt as a server to allow for easy integration with other applications.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var configAI ai.AIConfiguration
-		err := viper.UnmarshalKey("ai", &configAI)
-		if err != nil {
-			color.Red("Error: %v", err)
-			os.Exit(1)
-		}
-		var aiProvider *ai.AIProvider
-		if len(configAI.Providers) == 0 {
-			// Check for env injection
-			backend = os.Getenv("K8SGPT_BACKEND")
-			password := os.Getenv("K8SGPT_PASSWORD")
-			model := os.Getenv("K8SGPT_MODEL")
-			baseURL := os.Getenv("K8SGPT_BASEURL")
-			engine := os.Getenv("K8SGPT_ENGINE")
-			// If the envs are set, allocate in place to the aiProvider
-			// else exit with error
-			envIsSet := backend != "" || password != "" || model != ""
-			if envIsSet {
-				aiProvider = &ai.AIProvider{
-					Name:     backend,
-					Password: password,
-					Model:    model,
-					BaseURL:  baseURL,
-					Engine:   engine,
-				}
-
-				configAI.Providers = append(configAI.Providers, *aiProvider)
-
-				viper.Set("ai", configAI)
-				if err := viper.WriteConfig(); err != nil {
-					color.Red("Error writing config file: %s", err.Error())
-					os.Exit(1)
-				}
-			} else {
-				color.Red("Error: AI provider not specified in configuration. Please run k8sgpt auth")
-				os.Exit(1)
-			}
-		}
-		if aiProvider == nil {
-			for _, provider := range configAI.Providers {
-				if backend == provider.Name {
-					// the pointer to the range variable is not really an issue here, as there
-					// is a break right after, but to prevent potential future issues, a temp
-					// variable is assigned
-					p := provider
-					aiProvider = &p
-					break
-				}
-			}
-		}
-
-		if aiProvider.Name == "" {
-			color.Red("Error: AI provider %s not specified in configuration. Please run k8sgpt auth", backend)
-			os.Exit(1)
-		}
-
-		logger, err := zap.NewProduction()
-		if err != nil {
-			color.Red("failed to create logger: %v", err)
-			os.Exit(1)
-		}
-		defer logger.Sync()
-
-		server := k8sgptserver.Config{
-			Backend:     aiProvider.Name,
-			Port:        port,
-			MetricsPort: metricsPort,
-			Token:       aiProvider.Password,
-			Logger:      logger,
-		}
-
-		go func() {
-			if err := server.Serve(); err != nil {
-				color.Red("Error: %v", err)
-				os.Exit(1)
-			}
-		}()
-
-		// Wait for both servers to exit
-		select {}
 	},
 }
 

@@ -13,13 +13,10 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/ai"
-	k8sgptserver "github.com/k8sgpt-ai/k8sgpt/pkg/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
-
-var Server k8sgptserver.Config
 
 var HttpCmd = &cobra.Command{
 	Use:   "http",
@@ -62,14 +59,6 @@ var HttpCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		defer logger.Sync()
-
-		Server = k8sgptserver.Config{
-			Backend:     aiProvider.Name,
-			Port:        port,
-			MetricsPort: metricsPort,
-			Token:       aiProvider.Password,
-			Logger:      logger,
-		}
 
 		r := mux.NewRouter()
 		// new format: /api/gpt?cl=..&ns=..

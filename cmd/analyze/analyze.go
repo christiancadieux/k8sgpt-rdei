@@ -44,6 +44,10 @@ var AnalyzeCmd = &cobra.Command{
 	provide you with a list of issues that need to be resolved`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		if namespace == "" {
+			color.Red("-n namespace needed")
+			os.Exit(1)
+		}
 		// AnalysisResult configuration
 		config, err := analysis.NewAnalysis(backend,
 			language, filters, namespace, nocache, explain, maxConcurrency, withDoc, "")
