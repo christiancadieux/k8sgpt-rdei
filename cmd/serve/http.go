@@ -151,7 +151,7 @@ func getGpt(w http.ResponseWriter, r *http.Request, cluster, namespace string) {
 
 	config.RunAnalysis()
 
-	err = config.GetResolutionText(output)
+	err = config.GetResolutionText(output, false)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return

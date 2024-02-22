@@ -23,6 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+// TODO : if the statefulset use a storageClassTemplate and is not zone=green - generate an error.
+
 type StatefulSetAnalyzer struct{}
 
 func (StatefulSetAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
@@ -61,8 +63,7 @@ func (StatefulSetAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 			failures = append(failures, common.Failure{
 				Text: fmt.Sprintf(
-					"StatefulSet uses the service %s/%s which does not exist.",
-					sts.Namespace,
+					"StatefulSet uses the service %s which does not exist.",
 					serviceName,
 				),
 				KubernetesDoc: doc,
@@ -98,6 +99,8 @@ func (StatefulSetAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		}
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", sts.Namespace, sts.Name)] = common.PreAnalysis{
+				Namespace:      sts.Namespace,
+				ResourceName:   sts.Name,
 				StatefulSet:    sts,
 				FailureDetails: failures,
 			}
@@ -107,9 +110,11 @@ func (StatefulSetAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.StatefulSet.ObjectMeta)

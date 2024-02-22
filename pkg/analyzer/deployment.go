@@ -68,7 +68,7 @@ func (d DeploymentAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) 
 			doc := apiDoc.GetApiDocV2("spec.replicas")
 
 			failures = append(failures, common.Failure{
-				Text:          fmt.Sprintf("Deployment %s/%s has %d replicas but %d are available", deployment.Namespace, deployment.Name, *deployment.Spec.Replicas, deployment.Status.Replicas),
+				Text:          fmt.Sprintf("Deployment %s has %d replicas but %d are available", deployment.Name, *deployment.Spec.Replicas, deployment.Status.Replicas),
 				KubernetesDoc: doc,
 				Sensitive: []common.Sensitive{
 					{
@@ -83,6 +83,8 @@ func (d DeploymentAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) 
 		}
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", deployment.Namespace, deployment.Name)] = common.PreAnalysis{
+				Namespace:      deployment.Namespace,
+				ResourceName:   deployment.Name,
 				FailureDetails: failures,
 				Deployment:     deployment,
 			}
@@ -93,9 +95,11 @@ func (d DeploymentAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) 
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		a.Results = append(a.Results, currentAnalysis)

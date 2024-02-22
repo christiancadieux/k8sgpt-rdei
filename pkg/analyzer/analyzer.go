@@ -41,13 +41,14 @@ var coreAnalyzerMap = map[string]common.IAnalyzer{
 	"StatefulSet":           StatefulSetAnalyzer{},
 	"CronJob":               CronJobAnalyzer{},
 	"Node":                  NodeAnalyzer{},
+	"NetworkPolicy":         NetworkPolicyAnalyzer{},
 }
 
 var additionalAnalyzerMap = map[string]common.IAnalyzer{
 	"HorizontalPodAutoScaler": HpaAnalyzer{},
 	"PodDisruptionBudget":     PdbAnalyzer{},
-	"NetworkPolicy":           NetworkPolicyAnalyzer{},
-	"Log":                     LogAnalyzer{},
+
+	"Log": LogAnalyzer{},
 }
 
 func ListFilters() ([]string, []string, []string) {

@@ -62,6 +62,8 @@ func (PvcAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		}
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", pvc.Namespace, pvc.Name)] = common.PreAnalysis{
+				Namespace:             pvc.Namespace,
+				ResourceName:          pvc.Name,
 				PersistentVolumeClaim: pvc,
 				FailureDetails:        failures,
 			}
@@ -71,9 +73,11 @@ func (PvcAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.PersistentVolumeClaim.ObjectMeta)

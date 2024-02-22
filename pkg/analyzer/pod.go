@@ -120,6 +120,8 @@ func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		}
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)] = common.PreAnalysis{
+				Namespace:      pod.Namespace,
+				ResourceName:   pod.Name,
 				Pod:            pod,
 				FailureDetails: failures,
 			}
@@ -129,9 +131,11 @@ func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.Pod.ObjectMeta)

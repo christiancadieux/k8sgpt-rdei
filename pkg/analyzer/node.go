@@ -61,6 +61,8 @@ func (NodeAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 		if len(failures) > 0 {
 			preAnalysis[node.Name] = common.PreAnalysis{
+				Namespace:      "",
+				ResourceName:   node.Name,
 				Node:           node,
 				FailureDetails: failures,
 			}
@@ -71,9 +73,11 @@ func (NodeAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.Node.ObjectMeta)

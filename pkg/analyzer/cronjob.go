@@ -118,6 +118,8 @@ func (analyzer CronJobAnalyzer) Analyze(a common.Analyzer) ([]common.Result, err
 
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", cronJob.Namespace, cronJob.Name)] = common.PreAnalysis{
+				Namespace:      cronJob.Namespace,
+				ResourceName:   cronJob.Name,
 				FailureDetails: failures,
 			}
 			AnalyzerErrorsMetric.WithLabelValues(kind, cronJob.Name, cronJob.Namespace).Set(float64(len(failures)))
@@ -126,9 +128,11 @@ func (analyzer CronJobAnalyzer) Analyze(a common.Analyzer) ([]common.Result, err
 
 		for key, value := range preAnalysis {
 			currentAnalysis := common.Result{
-				Kind:  kind,
-				Name:  key,
-				Error: value.FailureDetails,
+				Namespace:    value.Namespace,
+				ResourceName: value.ResourceName,
+				Kind:         kind,
+				Name:         key,
+				Error:        value.FailureDetails,
 			}
 			a.Results = append(a.Results, currentAnalysis)
 		}

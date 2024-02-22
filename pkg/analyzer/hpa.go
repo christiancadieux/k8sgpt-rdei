@@ -110,7 +110,7 @@ func (HpaAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 				doc := apiDoc.GetApiDocV2("spec.scaleTargetRef.kind")
 
 				failures = append(failures, common.Failure{
-					Text:          fmt.Sprintf("%s %s/%s does not have resource configured.", scaleTargetRef.Kind, a.Namespace, scaleTargetRef.Name),
+					Text:          fmt.Sprintf("%s %s does not have resource configured.", scaleTargetRef.Kind, scaleTargetRef.Name),
 					KubernetesDoc: doc,
 					Sensitive: []common.Sensitive{
 						{
@@ -125,6 +125,8 @@ func (HpaAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", hpa.Namespace, hpa.Name)] = common.PreAnalysis{
+				Namespace:                hpa.Namespace,
+				ResourceName:             hpa.Name,
 				HorizontalPodAutoscalers: hpa,
 				FailureDetails:           failures,
 			}
@@ -135,9 +137,11 @@ func (HpaAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.HorizontalPodAutoscalers.ObjectMeta)

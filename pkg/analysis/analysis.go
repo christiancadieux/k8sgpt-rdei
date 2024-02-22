@@ -64,6 +64,21 @@ type JsonOutput struct {
 	Results  []common.Result `json:"results"`
 }
 
+func TestAnalysis() (*Analysis, error) {
+	return &Analysis{
+		Context:            context.Background(),
+		Filters:            nil,
+		Client:             nil,
+		AIClient:           nil,
+		Namespace:          "",
+		Cache:              nil,
+		Explain:            true,
+		MaxConcurrency:     1,
+		AnalysisAIProvider: "",
+		WithDoc:            true,
+	}, nil
+}
+
 func NewAnalysis(backend string, language string, filters []string, namespace string, noCache bool, explain bool, maxConcurrency int, withDoc bool,
 	kubecontext0 string) (*Analysis, error) {
 	var configAI ai.AIConfiguration

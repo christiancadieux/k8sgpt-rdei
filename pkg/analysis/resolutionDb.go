@@ -3,6 +3,7 @@ package analysis
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/k8sgpt-ai/k8sgpt/pkg/common"
 	"os"
 	"regexp"
 	"strings"
@@ -17,7 +18,7 @@ func LoadResolveIndex() error {
 	}
 	err = json.Unmarshal(b, &resolve)
 	if err != nil {
-		return err
+		return fmt.Errorf("Unmarshal index.json error - %v", err)
 	}
 	for _, r := range resolve {
 		fmt.Println("loading", r.Pattern, r.File)
@@ -32,13 +33,16 @@ type ResolveStruct struct {
 	Re      *regexp.Regexp
 }
 
-func (r *ResolveStruct) GetText(matches []string) string {
+func (r *ResolveStruct) GetText(matches []string, result common.Result) string {
 	b, err := os.ReadFile(RESOLVE_DIR + "/" + r.File)
 	if err != nil {
 		fmt.Print(err)
 		return ""
 	}
-	rc := string(b)
+
+	rc2 := strings.Replace(string(b), "{{resourceName}}", result.ResourceName, -1)
+	rc := strings.Replace(rc2, "{{namespace}}", result.Namespace, -1)
+
 	for ix, m := range matches {
 		if ix == 0 {
 			continue
@@ -50,7 +54,7 @@ func (r *ResolveStruct) GetText(matches []string) string {
 	return rc
 }
 
-func (a *Analysis) GetResolutionText(output string) error {
+func (a *Analysis) GetResolutionText(output string, trace bool) error {
 	if len(a.Results) == 0 {
 		return nil
 	}
@@ -59,12 +63,18 @@ func (a *Analysis) GetResolutionText(output string) error {
 		parsedText := ""
 		ref := ""
 		for _, failure := range analysis.Error {
-			// fmt.Printf("TEXT = %+v \n", failure.Text)
+			if trace {
+				fmt.Printf("Text: %+v \n", failure.Text)
+			}
 			for _, r := range resolve {
 				match := r.Re.FindStringSubmatch(failure.Text)
 				if len(match) > 1 {
-					parsedText += r.GetText(match)
+					parsedText += r.GetText(match, analysis)
+					if trace {
+						fmt.Println("Using file", r.File)
+					}
 					ref = r.File
+					break
 				}
 
 			}

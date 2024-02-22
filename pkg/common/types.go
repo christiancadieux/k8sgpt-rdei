@@ -43,6 +43,8 @@ type Analyzer struct {
 }
 
 type PreAnalysis struct {
+	Namespace                string
+	ResourceName             string
 	Pod                      v1.Pod
 	FailureDetails           []Failure
 	Deployment               appsv1.Deployment
@@ -65,6 +67,8 @@ type PreAnalysis struct {
 type Result struct {
 	Kind         string    `json:"kind"`
 	Name         string    `json:"name"`
+	Namespace    string    `json:"namespace"`
+	ResourceName string    `json:"resourceName"`
 	Error        []Failure `json:"error"`
 	Details      string    `json:"details"`
 	Ref          string    `json:"ref"`

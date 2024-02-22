@@ -61,6 +61,8 @@ func (ReplicaSetAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		}
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", rs.Namespace, rs.Name)] = common.PreAnalysis{
+				Namespace:      rs.Namespace,
+				ResourceName:   rs.Name,
 				ReplicaSet:     rs,
 				FailureDetails: failures,
 			}
@@ -70,9 +72,11 @@ func (ReplicaSetAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.ReplicaSet.ObjectMeta)

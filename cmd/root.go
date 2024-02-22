@@ -25,6 +25,7 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt/cmd/generate"
 	"github.com/k8sgpt-ai/k8sgpt/cmd/integration"
 	"github.com/k8sgpt-ai/k8sgpt/cmd/serve"
+	"github.com/k8sgpt-ai/k8sgpt/cmd/test"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -73,6 +74,7 @@ func init() {
 	rootCmd.AddCommand(integration.IntegrationCmd)
 	rootCmd.AddCommand(serve.ServeCmd)
 	rootCmd.AddCommand(serve.HttpCmd)
+	rootCmd.AddCommand(test.TestCmd)
 	rootCmd.AddCommand(cache.CacheCmd)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.k8sgpt.yaml)")
 	rootCmd.PersistentFlags().StringVar(&kubecontext, "kubecontext", "", "Kubernetes context to use. Only required if out-of-cluster.")

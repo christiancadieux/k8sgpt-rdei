@@ -81,6 +81,8 @@ func (PdbAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", pdb.Namespace, pdb.Name)] = common.PreAnalysis{
+				Namespace:           pdb.Namespace,
+				ResourceName:        pdb.Name,
 				PodDisruptionBudget: pdb,
 				FailureDetails:      failures,
 			}
@@ -90,9 +92,11 @@ func (PdbAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.PodDisruptionBudget.ObjectMeta)

@@ -14,6 +14,7 @@ limitations under the License.
 package analyzer
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/k8sgpt-ai/k8sgpt/pkg/common"
@@ -77,8 +78,9 @@ func (NetworkPolicyAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error)
 				return nil, err
 			}
 			if len(podList.Items) == 0 {
+				np, _ := json.Marshal(policy.Spec.PodSelector.MatchLabels)
 				failures = append(failures, common.Failure{
-					Text: fmt.Sprintf("Network policy is not applied to any pods: %s", policy.Name),
+					Text: fmt.Sprintf("Network policy %s with selector %v is not applied to any pods.", policy.Name, string(np)),
 					Sensitive: []common.Sensitive{
 						{
 							Unmasked: policy.Name,
@@ -91,6 +93,8 @@ func (NetworkPolicyAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error)
 
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", policy.Namespace, policy.Name)] = common.PreAnalysis{
+				Namespace:      policy.Namespace,
+				ResourceName:   policy.Name,
 				FailureDetails: failures,
 				NetworkPolicy:  policy,
 			}
@@ -101,9 +105,11 @@ func (NetworkPolicyAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error)
 
 	for key, value := range preAnalysis {
 		currentAnalysis := common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 		a.Results = append(a.Results, currentAnalysis)
 	}

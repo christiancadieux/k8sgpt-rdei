@@ -131,7 +131,7 @@ func (IngressAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 				doc := apiDoc.GetApiDocV2("spec.tls.secretName")
 
 				failures = append(failures, common.Failure{
-					Text:          fmt.Sprintf("Ingress uses the secret %s/%s as a TLS certificate which does not exist.", ing.Namespace, tls.SecretName),
+					Text:          fmt.Sprintf("Ingress uses the secret %s as a TLS certificate which does not exist.", tls.SecretName),
 					KubernetesDoc: doc,
 					Sensitive: []common.Sensitive{
 						{
@@ -148,6 +148,8 @@ func (IngressAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		}
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", ing.Namespace, ing.Name)] = common.PreAnalysis{
+				Namespace:      ing.Namespace,
+				ResourceName:   ing.Name,
 				Ingress:        ing,
 				FailureDetails: failures,
 			}
@@ -159,9 +161,11 @@ func (IngressAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.Ingress.ObjectMeta)

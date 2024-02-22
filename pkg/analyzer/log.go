@@ -56,6 +56,7 @@ func (LogAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		}
 
 		podLogs, err := a.Client.Client.CoreV1().Pods(pod.Namespace).GetLogs(podName, &podLogOptions).DoRaw(a.Context)
+
 		if err != nil {
 			failures = append(failures, common.Failure{
 				Text: fmt.Sprintf("Error %s from Pod %s", err.Error(), pod.Name),

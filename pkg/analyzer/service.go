@@ -60,7 +60,7 @@ func (ServiceAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		if len(ep.Subsets) == 0 {
 			svc, err := a.Client.GetClient().CoreV1().Services(ep.Namespace).Get(a.Context, ep.Name, metav1.GetOptions{})
 			if err != nil {
-				color.Yellow("Service %s/%s does not exist", ep.Namespace, ep.Name)
+				color.Yellow("Service %s does not exist", ep.Name)
 				continue
 			}
 
@@ -109,6 +109,8 @@ func (ServiceAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 		if len(failures) > 0 {
 			preAnalysis[fmt.Sprintf("%s/%s", ep.Namespace, ep.Name)] = common.PreAnalysis{
+				Namespace:      ep.Namespace,
+				ResourceName:   ep.Name,
 				Endpoint:       ep,
 				FailureDetails: failures,
 			}
@@ -118,9 +120,11 @@ func (ServiceAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	for key, value := range preAnalysis {
 		var currentAnalysis = common.Result{
-			Kind:  kind,
-			Name:  key,
-			Error: value.FailureDetails,
+			Namespace:    value.Namespace,
+			ResourceName: value.ResourceName,
+			Kind:         kind,
+			Name:         key,
+			Error:        value.FailureDetails,
 		}
 
 		parent, _ := util.GetParent(a.Client, value.Endpoint.ObjectMeta)
