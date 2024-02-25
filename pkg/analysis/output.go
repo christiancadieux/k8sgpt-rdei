@@ -81,20 +81,31 @@ func (a *Analysis) textOutput() ([]byte, error) {
 			output.WriteString(fmt.Sprintf("- %s\n", color.YellowString(aerror)))
 		}
 	}
-	output.WriteString("\n")
+	if !a.ShortText {
+		output.WriteString("\n")
+	}
 	if len(a.Results) == 0 {
-		output.WriteString(color.GreenString("No problems detected\n"))
+		if !a.ShortText {
+			output.WriteString(color.GreenString("No problems detected\n"))
+		}
 		return []byte(output.String()), nil
 	}
 	for n, result := range a.Results {
-		output.WriteString(fmt.Sprintf("\n------------------------------------------------------------------------------------\n%s Resource: %s, Parent: %s\n",
-			color.CyanString("%d", n),
-			color.YellowString(result.Name), color.CyanString(result.ParentObject)))
+		if !a.ShortText {
+			output.WriteString(fmt.Sprintf("\n------------------------------------------------------------------------------------\n%s Resource: %s, Parent: %s\n",
+				color.CyanString("%d", n),
+				color.YellowString(result.Name), color.CyanString(result.ParentObject)))
+		}
+
 		for _, err := range result.Error {
 			saveError(f, err.Text)
-			output.WriteString(fmt.Sprintf("\n%s %s\n", color.RedString("Error:"), color.RedString(err.Text)))
-			if err.KubernetesDoc != "" {
-				output.WriteString(fmt.Sprintf("  %s %s\n", color.RedString("Kubernetes Doc:"), color.RedString(err.KubernetesDoc)))
+			if a.ShortText {
+				output.WriteString(fmt.Sprintf("%s, %s %s : %s\n", result.Namespace, result.Kind, result.ResourceName, err.Text))
+			} else {
+				output.WriteString(fmt.Sprintf("\n%s %s\n", color.RedString("Error:"), color.RedString(err.Text)))
+				if err.KubernetesDoc != "" {
+					output.WriteString(fmt.Sprintf("  %s %s\n", color.RedString("Kubernetes Doc:"), color.RedString(err.KubernetesDoc)))
+				}
 			}
 		}
 		if len(result.Details) > 7 {

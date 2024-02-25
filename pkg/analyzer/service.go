@@ -63,25 +63,20 @@ func (ServiceAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 				color.Yellow("Service %s does not exist", ep.Name)
 				continue
 			}
-
+			labels := ""
 			for k, v := range svc.Spec.Selector {
-				doc := apiDoc.GetApiDocV2("spec.selector")
-
-				failures = append(failures, common.Failure{
-					Text:          fmt.Sprintf("Service %s has no endpoints, expected label %s=%s", ep.Name, k, v),
-					KubernetesDoc: doc,
-					Sensitive: []common.Sensitive{
-						{
-							Unmasked: k,
-							Masked:   util.MaskString(k),
-						},
-						{
-							Unmasked: v,
-							Masked:   util.MaskString(v),
-						},
-					},
-				})
+				if labels != "" {
+					labels += ", "
+				}
+				labels += fmt.Sprintf("%s=%s", k, v)
 			}
+			doc := apiDoc.GetApiDocV2("spec.selector")
+			failures = append(failures, common.Failure{
+				Text:          fmt.Sprintf("Service %s has no endpoints, expected labels [%s]", ep.Name, labels),
+				KubernetesDoc: doc,
+				Sensitive:     []common.Sensitive{},
+			})
+
 		} else {
 			count := 0
 			pods := []string{}

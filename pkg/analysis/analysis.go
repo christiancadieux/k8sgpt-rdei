@@ -46,6 +46,7 @@ type Analysis struct {
 	MaxConcurrency     int
 	AnalysisAIProvider string // The name of the AI Provider used for this analysis
 	WithDoc            bool
+	ShortText          bool
 }
 
 type AnalysisStatus string
@@ -80,7 +81,7 @@ func TestAnalysis() (*Analysis, error) {
 }
 
 func NewAnalysis(backend string, language string, filters []string, namespace string, noCache bool, explain bool, maxConcurrency int, withDoc bool,
-	kubecontext0 string) (*Analysis, error) {
+	kubecontext0 string, shortText bool) (*Analysis, error) {
 	var configAI ai.AIConfiguration
 	err := viper.UnmarshalKey("ai", &configAI)
 	if err != nil {
@@ -150,6 +151,7 @@ func NewAnalysis(backend string, language string, filters []string, namespace st
 		MaxConcurrency:     maxConcurrency,
 		AnalysisAIProvider: backend,
 		WithDoc:            withDoc,
+		ShortText:          shortText,
 	}, nil
 }
 

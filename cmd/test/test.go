@@ -2,12 +2,11 @@ package test
 
 import (
 	"fmt"
-	"github.com/k8sgpt-ai/k8sgpt/pkg/common"
-	"os"
-
 	"github.com/fatih/color"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/analysis"
+	"github.com/k8sgpt-ai/k8sgpt/pkg/common"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (

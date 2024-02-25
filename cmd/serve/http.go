@@ -144,7 +144,7 @@ func getGpt(w http.ResponseWriter, r *http.Request, cluster, namespace string) {
 
 	config, err := analysis.NewAnalysis(backend,
 		language, filters, namespace, !cache, explain, 10, docs,
-		cluster)
+		cluster, true)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}

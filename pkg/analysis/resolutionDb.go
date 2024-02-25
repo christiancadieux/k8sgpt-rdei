@@ -40,7 +40,7 @@ func (r *ResolveStruct) GetText(matches []string, result common.Result) string {
 		return ""
 	}
 
-	rc2 := strings.Replace(string(b), "{{resourceName}}", result.ResourceName, -1)
+	rc2 := strings.Replace(string(b), "{{resource}}", result.ResourceName, -1)
 	rc := strings.Replace(rc2, "{{namespace}}", result.Namespace, -1)
 
 	for ix, m := range matches {

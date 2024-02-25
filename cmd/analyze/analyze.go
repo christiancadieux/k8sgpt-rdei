@@ -33,6 +33,7 @@ var (
 	anonymize      bool
 	maxConcurrency int
 	withDoc        bool
+	shortText      bool
 )
 
 // AnalyzeCmd represents the problems command
@@ -44,13 +45,10 @@ var AnalyzeCmd = &cobra.Command{
 	provide you with a list of issues that need to be resolved`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if namespace == "" {
-			color.Red("-n namespace needed")
-			os.Exit(1)
-		}
 		// AnalysisResult configuration
+
 		config, err := analysis.NewAnalysis(backend,
-			language, filters, namespace, nocache, explain, maxConcurrency, withDoc, "")
+			language, filters, namespace, nocache, explain, maxConcurrency, withDoc, "", shortText)
 		if err != nil {
 			color.Red("Error: %v", err)
 			os.Exit(1)
@@ -72,7 +70,11 @@ var AnalyzeCmd = &cobra.Command{
 			color.Red("Error: %v", err)
 			os.Exit(1)
 		}
-		fmt.Println(string(output))
+		if shortText {
+			fmt.Printf("%s", string(output))
+		} else {
+			fmt.Println(string(output))
+		}
 	},
 }
 
@@ -88,6 +90,7 @@ func init() {
 	AnalyzeCmd.Flags().StringSliceVarP(&filters, "filter", "f", []string{}, "Filter for these analyzers (e.g. Pod, PersistentVolumeClaim, Service, ReplicaSet)")
 	// explain flag
 	AnalyzeCmd.Flags().BoolVarP(&explain, "explain", "e", false, "Explain the problem to me")
+	AnalyzeCmd.Flags().BoolVarP(&shortText, "short", "z", false, "Short text output")
 	// add flag for backend
 	AnalyzeCmd.Flags().StringVarP(&backend, "backend", "b", "openai", "Backend AI provider")
 	// output as json
