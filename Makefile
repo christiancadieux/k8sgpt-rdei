@@ -7,3 +7,6 @@ all:
 	cp bin/k8sgpt  ~/go/src/github.comcast.com/k8s-eng/rdei-k8sgpt
 	cp bin/k8sgpt  /home/ccadie883/CC/Scripts/k8sgpt
 
+run:
+	kubectl get ns --no-headers| awk '{print $1}' | grep -v kube-system > /tmp/ns1
+	for i in `cat /tmp/ns1`; do k8sgpt analyze -n $i -z; done

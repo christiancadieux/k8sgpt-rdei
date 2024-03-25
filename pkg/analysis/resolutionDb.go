@@ -21,7 +21,7 @@ func LoadResolveIndex() error {
 		return fmt.Errorf("Unmarshal index.json error - %v", err)
 	}
 	for _, r := range resolve {
-		fmt.Println("loading", r.Pattern, r.File)
+		fmt.Println("loading pattern=", r.Pattern, ", file=", r.File)
 		r.Re = regexp.MustCompile(r.Pattern)
 	}
 	return nil

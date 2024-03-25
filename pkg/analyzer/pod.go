@@ -18,10 +18,44 @@ import (
 
 	"github.com/k8sgpt-ai/k8sgpt/pkg/common"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/util"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type PodAnalyzer struct {
+}
+
+func isSystemNamespace(ns string) bool {
+	if ns == "default" || ns == "kube-node-lease" || ns == "kube-public" || ns == "kube-system" || ns == "platform-load-balancer" ||
+		ns == "rdei-system" {
+		return true
+	}
+	return false
+}
+
+func VolumeWithoutGreenSelector(pod corev1.Pod) bool {
+
+	hasVolume := false
+	if pod.Spec.Volumes != nil {
+		for _, v := range pod.Spec.Volumes {
+			if v.PersistentVolumeClaim != nil {
+				hasVolume = true
+				break
+			}
+		}
+	}
+	if !hasVolume {
+		return false
+	}
+	// there is a volume - need to be green
+	if pod.Spec.NodeSelector == nil {
+		return true
+	}
+
+	if _, ok := pod.Spec.NodeSelector["rdei.io/sec-zone-green"]; !ok {
+		return true
+	}
+	return false
 }
 
 func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
@@ -47,17 +81,31 @@ func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		var failures []common.Failure
 		// Check for pending pods
 
-		if pod.Spec.NodeSelector == nil && pod.Namespace != "kube-system" && pod.Namespace != "rdei-system" && nodeSelectorMissing == 0 {
-			nodeSelectorMissing++
-			failures = append(failures, common.Failure{
-				Text: `Pods need a spec.nodeSelector. Add rdei.io/sec-zone-green: "true" to the pod or deployment to access the green zone. Same for blue or origin.`,
-				Sensitive: []common.Sensitive{
-					{
-						Unmasked: pod.Name, Masked: util.MaskString(pod.Name),
+		if !isSystemNamespace(pod.Namespace) {
+			if VolumeWithoutGreenSelector(pod) {
+				failures = append(failures, common.Failure{
+					Text: fmt.Sprintf(`Pod %s is accessing a volume and need to run in the green zone. `, pod.Name),
+					Sensitive: []common.Sensitive{
+						{
+							Unmasked: pod.Name, Masked: util.MaskString(pod.Name),
+						},
 					},
-				},
-			})
+				})
+			}
+
+			if pod.Spec.NodeSelector == nil && nodeSelectorMissing == 0 {
+				nodeSelectorMissing++
+				failures = append(failures, common.Failure{
+					Text: `Pods need a spec.nodeSelector. Add rdei.io/sec-zone-green: "true" to the pod or deployment to access the green zone. Same for blue or origin.`,
+					Sensitive: []common.Sensitive{
+						{
+							Unmasked: pod.Name, Masked: util.MaskString(pod.Name),
+						},
+					},
+				})
+			}
 		}
+
 		if pod.Status.Phase == "Pending" {
 
 			// Check through container status to check for crashes
