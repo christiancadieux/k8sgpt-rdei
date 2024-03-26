@@ -58,6 +58,33 @@ func VolumeWithoutGreenSelector(pod corev1.Pod) bool {
 	return false
 }
 
+func HasPBSVolume(a common.Analyzer, pod corev1.Pod, pvcList *corev1.PersistentVolumeClaimList) string {
+
+	if pod.Spec.Volumes != nil {
+		for _, v := range pod.Spec.Volumes {
+			if v.PersistentVolumeClaim != nil {
+				for _, pvc := range pvcList.Items {
+					fmt.Printf("PVC=%s, item=%s \n", pvc.Name, v.PersistentVolumeClaim.ClaimName)
+					if pvc.Name == v.PersistentVolumeClaim.ClaimName {
+						if pvc.Spec.StorageClassName != nil {
+							pv, err := a.Client.GetClient().CoreV1().PersistentVolumes().Get(a.Context, pvc.Spec.VolumeName, metav1.GetOptions{})
+							if err != nil {
+								fmt.Printf("Error reading PersistentVolume %s - %v \n ", pvc.Spec.VolumeName, err)
+								return ""
+							}
+							fmt.Printf("PV %s - %+v \n", pvc.Spec.VolumeName, pv.Spec.PortworxVolume)
+							if pv.Spec.PortworxVolume != nil {
+								return pvc.Spec.VolumeName
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
+
 func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 
 	kind := "Pod"
@@ -65,6 +92,11 @@ func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 	AnalyzerErrorsMetric.DeletePartialMatch(map[string]string{
 		"analyzer_name": kind,
 	})
+
+	pvcList, err := a.Client.GetClient().CoreV1().PersistentVolumeClaims(a.Namespace).List(a.Context, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
 
 	// search all namespaces for pods that are not running
 	list, err := a.Client.GetClient().CoreV1().Pods(a.Namespace).List(a.Context, metav1.ListOptions{})
@@ -82,6 +114,19 @@ func (PodAnalyzer) Analyze(a common.Analyzer) ([]common.Result, error) {
 		// Check for pending pods
 
 		if !isSystemNamespace(pod.Namespace) {
+			if pod.Spec.SchedulerName != "stork" {
+				vol := HasPBSVolume(a, pod, pvcList)
+				if vol != "" {
+					failures = append(failures, common.Failure{
+						Text: fmt.Sprintf(`Pod %s is accessing PBS volume %s and need to run the stork scheduler. `, pod.Name, vol),
+						Sensitive: []common.Sensitive{
+							{
+								Unmasked: pod.Name, Masked: util.MaskString(pod.Name),
+							},
+						},
+					})
+				}
+			}
 			if VolumeWithoutGreenSelector(pod) {
 				failures = append(failures, common.Failure{
 					Text: fmt.Sprintf(`Pod %s is accessing a volume and need to run in the green zone. `, pod.Name),
