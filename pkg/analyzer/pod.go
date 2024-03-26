@@ -64,7 +64,6 @@ func HasPBSVolume(a common.Analyzer, pod corev1.Pod, pvcList *corev1.PersistentV
 		for _, v := range pod.Spec.Volumes {
 			if v.PersistentVolumeClaim != nil {
 				for _, pvc := range pvcList.Items {
-					fmt.Printf("PVC=%s, item=%s \n", pvc.Name, v.PersistentVolumeClaim.ClaimName)
 					if pvc.Name == v.PersistentVolumeClaim.ClaimName {
 						if pvc.Spec.StorageClassName != nil {
 							pv, err := a.Client.GetClient().CoreV1().PersistentVolumes().Get(a.Context, pvc.Spec.VolumeName, metav1.GetOptions{})
@@ -72,7 +71,6 @@ func HasPBSVolume(a common.Analyzer, pod corev1.Pod, pvcList *corev1.PersistentV
 								fmt.Printf("Error reading PersistentVolume %s - %v \n ", pvc.Spec.VolumeName, err)
 								return ""
 							}
-							fmt.Printf("PV %s - %+v \n", pvc.Spec.VolumeName, pv.Spec.PortworxVolume)
 							if pv.Spec.PortworxVolume != nil {
 								return pvc.Spec.VolumeName
 							}
